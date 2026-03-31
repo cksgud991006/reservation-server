@@ -1,10 +1,14 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using TicketServer.Domain.Seats;
 using TicketServer.Infrastructure.Database;
+using TicketServer.Domain.Seed;
 
 namespace TicketServer.Application.Repositories;
 
-public class DbInitializer(IServiceScopeFactory scopeFactory, ILogger<DbInitializer> logger): IHostedService
+public class DbInitializer(IServiceScopeFactory scopeFactory, 
+                           IConfiguration configuration,
+                           ILogger<DbInitializer> logger): IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -14,50 +18,42 @@ public class DbInitializer(IServiceScopeFactory scopeFactory, ILogger<DbInitiali
             
             seatContext.Database.Migrate();
 
-            if (!seatContext.FlightInventories.Any())
+            var options = configuration.GetSection("SeedData").Get<SeedDataOptions>();
+
+            foreach (var config in options.Flights)
             {
-                seatContext.FlightInventories.AddRange(new FlightInventory
+                // 1. Check/Add Flight Inventory
+                var inventory = await seatContext.FlightInventories
+                    .FirstOrDefaultAsync(f => f.FlightNumber == config.FlightNumber);
+
+                if (inventory == null)
                 {
-                    FlightNumber = "AA123",
-                    TotalSeats = 200,
-                    AvailableSeats = 200
-                }, new FlightInventory
+                    inventory = new FlightInventory
+                    {
+                        FlightNumber = config.FlightNumber,
+                        TotalSeats = config.SeatCount,
+                        AvailableSeats = config.SeatCount
+                    };
+                    seatContext.FlightInventories.Add(inventory);
+                }
+
+                // 2. Check/Add Seats for this flight
+                var existingSeatsCount = await seatContext.Seats
+                    .CountAsync(s => s.FlightNumber == config.FlightNumber);
+                if (existingSeatsCount < config.SeatCount)
                 {
-                    FlightNumber = "BB456",
-                    TotalSeats = 150,
-                    AvailableSeats = 150
-                }, new FlightInventory
-                {
-                    FlightNumber = "CC789",
-                    TotalSeats = 180,
-                    AvailableSeats = 180
-                });
-                await seatContext.SaveChangesAsync(cancellationToken);
+                    var seatsToAdd = new List<Seat>();
+                    for (int i = existingSeatsCount; i < config.SeatCount; ++i)
+                    {
+                        seatsToAdd.Add(Seat.Create(config.FlightNumber, ClassType.Economy, $"{i}{config.Prefix}", SeatStatus.Available));
+                    }
+
+                    seatContext.Seats.AddRange(seatsToAdd);
+                }
             }
-
-            if (!seatContext.Seats.Any())
-            {
-                var seats = new List<Seat>();
-                for (int i = 1; i <= 200; i++)
-                {
-                    seats.Add(Seat.Create("AA123", ClassType.Economy, $"A{i}", SeatStatus.Available));
-                }
-
-                for (int i = 1; i <= 150; i++)
-                {
-                    seats.Add(Seat.Create("BB456", ClassType.Economy, $"B{i}", SeatStatus.Available));
-                }
-
-                for (int i = 1; i <= 180; i++)
-                {
-                    seats.Add(Seat.Create("CC789", ClassType.Economy, $"C{i}", SeatStatus.Available));
-                }
-                
-                seatContext.Seats.AddRange(seats);
-                await seatContext.SaveChangesAsync(cancellationToken);
-            }
+            
+            await seatContext.SaveChangesAsync(cancellationToken);
         }
-        
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)

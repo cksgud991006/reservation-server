@@ -1,0 +1,7 @@
+{
+    "SeedData": {
+        "Flights": [
+            { "FlightNumber": "FL-100", "SeatCount": 500, "Prefix": "A" }
+        ]
+  }
+}
