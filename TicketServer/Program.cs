@@ -5,8 +5,7 @@ using TicketServer.Application.Repositories;
 using TicketServer.Infrastructure.Database;
 using StackExchange.Redis;
 using TicketServer.Schedule;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
-using System.Text.Json.Serialization;
+using TicketServer.Domain.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +23,10 @@ var redisOptions = new ConfigurationOptions
 redisOptions.AbortOnConnectFail = false; // Keep the app alive if Redis is down
 redisOptions.ConnectTimeout = 5000;      // Wait 5 seconds before timing out
 redisOptions.ConnectRetry = 5;           // Try 5 times to reconnect
+
+builder.Services.Configure<SeedDataOptions>(
+    builder.Configuration.GetSection("SeedData"));
+builder.Services.AddHostedService<DbInitializer>();
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisOptions));
 builder.Services.AddScoped<IJobScheduler, JobScheduler> ();
