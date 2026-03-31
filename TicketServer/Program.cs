@@ -24,10 +24,11 @@ redisOptions.AbortOnConnectFail = false; // Keep the app alive if Redis is down
 redisOptions.ConnectTimeout = 5000;      // Wait 5 seconds before timing out
 redisOptions.ConnectRetry = 5;           // Try 5 times to reconnect
 
-builder.Services.Configure<SeedDataOptions>(
-    builder.Configuration.GetSection("SeedData"));
-builder.Services.AddHostedService<DbInitializer>();
 
+var scenario = builder.Configuration["TestScenario"] ?? "normal";
+builder.Configuration.AddJsonFile($"scenarios/{scenario}.json", optional: false, reloadOnChange: true);
+
+builder.Services.AddHostedService<DbInitializer>();
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisOptions));
 builder.Services.AddScoped<IJobScheduler, JobScheduler> ();
 builder.Services.AddSingleton<IJobRunner, JobRunner> ();

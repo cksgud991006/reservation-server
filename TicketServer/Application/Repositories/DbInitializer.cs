@@ -7,7 +7,7 @@ using TicketServer.Domain.Seed;
 namespace TicketServer.Application.Repositories;
 
 public class DbInitializer(IServiceScopeFactory scopeFactory, 
-                           IOptions<SeedDataOptions> seedDataOptions,
+                           IConfiguration configuration,
                            ILogger<DbInitializer> logger): IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -18,7 +18,9 @@ public class DbInitializer(IServiceScopeFactory scopeFactory,
             
             seatContext.Database.Migrate();
 
-            foreach (var config in seedDataOptions.Value.Flights)
+            var options = configuration.GetSection("SeedData").Get<SeedDataOptions>();
+
+            foreach (var config in options.Flights)
             {
                 // 1. Check/Add Flight Inventory
                 var inventory = await seatContext.FlightInventories
@@ -43,7 +45,7 @@ public class DbInitializer(IServiceScopeFactory scopeFactory,
                     var seatsToAdd = new List<Seat>();
                     for (int i = existingSeatsCount; i < config.SeatCount; ++i)
                     {
-                        seatsToAdd.Add(Seat.Create(config.FlightNumber, ClassType.Economy, $"{config.Prefix}{i}", SeatStatus.Available));
+                        seatsToAdd.Add(Seat.Create(config.FlightNumber, ClassType.Economy, $"{i}{config.Prefix}", SeatStatus.Available));
                     }
 
                     seatContext.Seats.AddRange(seatsToAdd);

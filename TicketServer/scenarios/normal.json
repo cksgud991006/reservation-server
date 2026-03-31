@@ -1,0 +1,9 @@
+{
+    "SeedData": {
+        "Flights": [
+            { "FlightNumber": "AA123", "SeatCount": 200, "Prefix": "A" },
+            { "FlightNumber": "BB456", "SeatCount": 1, "Prefix": "B" }, 
+            { "FlightNumber": "CC789", "SeatCount": 180, "Prefix": "C" }
+        ]
+  }
+}
