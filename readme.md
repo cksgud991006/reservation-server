@@ -34,11 +34,11 @@ The system handles requests in multiple layers:
 3. Persistence Layer: Ensures the transaction is committed to PostgreSQL.
 
 ## Performance
-The configurable scenario simulations are defined in scenarios/*.json.
+The configurable scenario simulations are defined in `scenarios/*.json`.
 
 | Scenario | Description | Key Metric | Full Report |
-| :--- | :--- | :--- |
-| **High Contention** | 1 Seat vs 100 Concurrent Requests | **Integrity**: Exactly 1 sucess, 99 failures | [View HTML](./performance/contention_test/html/index.html) |
-| **Stress Test** | 500 volumes of flights and seats | **Throughput:** 55.33 TPS <br> **Stability:** $P99 \approx 147.99ms$ | [View HTML](./performance/stress_test/html/index.html) |
+| :--- | :--- | :--- | :--- |
+| **High Contention** | 1 Seat vs 100 Concurrent Requests | **Integrity**: Exactly 1 success, 99 failures | [View HTML](https://cksgud991006.github.io/ticket-issuance-service/performance/contention_test/html/index.html) |
+| **Stress Test** | 500+ flights and 1,000 requests | **Throughput:** 55.33 TPS <br> **Stability:** $P99 \approx 147.99ms$ | [View HTML](https://cksgud991006.github.io/ticket-issuance-service/performance/stress_test/html/index.html) |
 
 Detailed metrics can be found in [performance](https://github.com/cksgud991006/ticket-issuance-service/tree/main/performance)
