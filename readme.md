@@ -39,6 +39,6 @@ The configurable scenario simulations are defined in `scenarios/*.json`.
 | Scenario | Description | Key Metric | Full Report |
 | :--- | :--- | :--- | :--- |
 | **High Contention** | 1 Seat vs 100 Concurrent Requests | **Integrity**: Exactly 1 success, 99 failures | [View HTML](https://cksgud991006.github.io/ticket-issuance-service/performance/contention_test/html/index.html) |
-| **Stress Test** | 1M volumes of flights and seats | **Throughput:** 1146.67 TPS <br> **Stability:** $Median \approx 118.00 ms$ | [View HTML](https://cksgud991006.github.io/ticket-issuance-service/performance/stress_test/html/index.html) |
+| **Stress Test** | 1M volumes of flights and seats | **Throughput:** 1146.67 RPS <br> **Stability:** $Median \approx 118.00 ms$ | [View HTML](https://cksgud991006.github.io/ticket-issuance-service/performance/stress_test/html/index.html) |
 
 Detailed metrics can be found in [performance](https://github.com/cksgud991006/ticket-issuance-service/tree/main/performance)
