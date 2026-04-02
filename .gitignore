@@ -14,3 +14,6 @@ appsettings.json
 # log files
 note.txt
 *.log
+
+# test files
+**/results.jtl

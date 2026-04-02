@@ -66,29 +66,17 @@ public class SeatInventoryRepository : ISeatInventoryRepository
     }
     public async Task UpdateSeatStatus(Seat seat, SeatStatus newStatus, string heldByUserId)
     {
-        try {
-            int affectedRows = await _context.Seats
+        int affectedRows = await _context.Seats
                 .Where(s => s.SeatId == seat.SeatId && s.Status == SeatStatus.Available)
                 .ExecuteUpdateAsync(row => row
                     .SetProperty(s => s.Status, newStatus)
                     .SetProperty(s => s.HeldByUserId, heldByUserId));
  
-            // 2. Logic Check: If 0, the seat wasn't available (or ID was wrong)
-            if (affectedRows == 0)
-            {
-                // Throw a specific error that your controller can catch
-                throw new InvalidOperationException("SEAT_UNAVAILABLE");
-            }
-        } catch (DbUpdateException ex)
+        // 2. Logic Check: If 0, the seat wasn't available (or ID was wrong)
+        if (affectedRows == 0)
         {
-            // This catches actual DB errors (connection issues, etc.)
-            _logger.LogError(ex, "Database system failure during seat update.");
-            throw; 
-        } catch (InvalidOperationException ex) when (ex.Message == "SEAT_UNAVAILABLE")
-        {
-            // This catches your custom logic error
-            _logger.LogWarning($"Booking conflict for Seat {seat.SeatId}. It was likely taken.");
-            throw; // Pass this up to your controller
+            // Throw a specific error that your controller can catch
+            throw new InvalidOperationException("SEAT_UNAVAILABLE");
         }
     }
 }

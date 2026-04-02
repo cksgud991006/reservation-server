@@ -18,7 +18,7 @@ public class TaskRunnerService : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             await _jobRunner.RunAsync();
-            await Task.Delay(1000, stoppingToken);
+            await Task.Delay(250, stoppingToken);
         }
     }
 }

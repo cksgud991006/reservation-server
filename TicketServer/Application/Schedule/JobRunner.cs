@@ -7,7 +7,7 @@ namespace TicketServer.Schedule;
 public class JobRunner : IJobRunner
 {
     private readonly IDatabase _redis;
-    private readonly int _loadCount = 1000;
+    private readonly int _loadCount = 500;
     private int _startCount = 0;
 
     public JobRunner(IConnectionMultiplexer connectionMultiplexer)
