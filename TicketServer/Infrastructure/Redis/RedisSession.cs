@@ -1,14 +1,14 @@
-using TicketServer.Application.Repositories;
+using TicketServer.Infrastructure.Redis;
 using TicketServer.Domain.Redis;
 using TicketServer.Domain.Response;
 using StackExchange.Redis;
 
-namespace TicketServer.Application.Services;
+namespace TicketServer.Infrastructure.Redis;
 
-public class SessionService: ISessionService
+public class RedisSession: IRedisSession
 {
     private readonly IDatabase _redis;
-    public SessionService(IConnectionMultiplexer connectionMultiplexer)
+    public RedisSession(IConnectionMultiplexer connectionMultiplexer)
     {
         _redis = connectionMultiplexer.GetDatabase();   
     }

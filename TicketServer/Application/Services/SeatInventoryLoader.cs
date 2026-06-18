@@ -13,21 +13,46 @@ public class SeatInventoryLoader(IServiceScopeFactory scopeFactory, ILogger<Seat
             var seatInventoryRepository = scope.ServiceProvider.GetRequiredService<ISeatInventoryRepository>();
             var multiplexer = scope.ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
             var redis = multiplexer.GetDatabase();
-            var seats = await seatInventoryRepository.GetSeats();
+            
+            var flightInstances = await seatInventoryRepository.GetFlightInstances();
 
-            foreach (var seat in seats)
+            // Load flight instances into Redis
+            foreach (var instance in flightInstances)
             {
-                var flightAvailableCountKey = RedisKeys.GetFlightAvailableCountKey(seat.FlightNumber);
-                if (!await redis.KeyExistsAsync(flightAvailableCountKey).WaitAsync(cancellationToken))
-                {
-                    var availableSeat = await seatInventoryRepository.GetAvailableSeats(seat.FlightNumber);
-                    await redis.StringSetAsync(flightAvailableCountKey, availableSeat).WaitAsync(cancellationToken);
-                }
+                var key = RedisKeys.FlightInstance(instance.FlightNumber, instance.DepartureTime);
+                var val = instance.FlightId;
+                logger.LogInformation("Loading flight instance into Redis: {Key} -> {Value}", key, val);
+                await redis.StringSetAsync(key, val).WaitAsync(cancellationToken);
+            }
 
-                var flightKey = RedisKeys.GetMasterFlightKey(seat.FlightNumber);
-                var seatField = RedisKeys.GetSeatField(seat.SeatClass, seat.SeatNumber);
-                logger.LogInformation("Adding seat {SeatField} to Redis set for flight {FlightKey}", seatField, flightKey);
-                await redis.SetAddAsync(flightKey, seatField).WaitAsync(cancellationToken);
+            // Load flight seat counts into Redis
+            var seatCounts = await seatInventoryRepository.GetFlightSeatCounts();
+            foreach (var seatCount in seatCounts)
+            {
+                var key = RedisKeys.FlightSeatCount(seatCount.FlightId);
+                var val = seatCount.TotalSeatCount;
+                logger.LogInformation("Loading flight seat count into Redis: {Key} -> {Value}", key, val);
+                await redis.StringSetAsync(key, val).WaitAsync(cancellationToken);
+            }
+
+            // Load seat layouts into Redis
+            var seatLayouts = await seatInventoryRepository.GetSeatLayouts();
+            foreach (var layout in seatLayouts)
+            {
+                var key = RedisKeys.SeatLayout(layout.FlightNumber, layout.SeatNumber);
+                var val = layout.SeatClass.ToString();
+                logger.LogInformation("Loading seat layout into Redis: {Key} -> {Value}", key, val);
+                await redis.StringSetAsync(key, val).WaitAsync(cancellationToken);
+            }
+
+            // Load flight bookings into Redis
+            var bookings = await seatInventoryRepository.GetFlightBookings();
+            foreach (var booking in bookings)
+            {
+                var key = RedisKeys.FlightBooking(booking.FlightId, booking.SeatNumber);
+                var val = booking.UserId;
+                logger.LogInformation("Loading flight booking into Redis: {Key} -> {Value}", key, val);
+                await redis.SetAddAsync(key, val).WaitAsync(cancellationToken);
             }
         }
     }

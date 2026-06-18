@@ -1,5 +1,5 @@
 using TicketServer.Application.Services;
-using TicketServer.Domain.Tickets;
+using TicketServer.Infrastructure.Redis;
 using TicketServer.Api.Dto;
 
 namespace TicketServer.Endpoints;
@@ -9,12 +9,9 @@ public static class TicketEndpoint
     public static void MapTicketEndPoints(this WebApplication app)
     {
         // GET 
-        app.MapGet("/queue/status/{id}", GetQueueStatus); // pulling
-        app.MapGet("/active/status/{id}", GetActiveStatus); // pulling
-        app.MapGet("/seats/{flightNumber}", GetAvailableFlightSeatCount);
-        app.MapGet("/seats/total/{flightNumber}", GetTotalFlightSeats);
-        app.MapGet("/seats/reserved/{flightNumber}", GetReservedFlightSeats);
-        app.MapGet("/tickets/{ticketId}", () => GetTicketStatus); // placeholder
+        app.MapGet("/queue/status/{id}", GetQueueStatus);
+        app.MapGet("/active/status/{id}", GetActiveStatus);
+        app.MapGet("/api/booked/{bookingId}", GetBookedStatus);
         
         // POST
         app.MapPost("/queue", Enqueue); 
@@ -52,7 +49,7 @@ public static class TicketEndpoint
 
     private static async Task<IResult> GetActiveStatus(
         Guid id,
-        ISessionService service)
+        IRedisSession service)
     {
         // polling active status from redis
         var sessionStatus = await service.GetSessionStatusAsync(id);
@@ -78,84 +75,36 @@ public static class TicketEndpoint
         };
     }
 
-    private static async Task<IResult> GetAvailableFlightSeatCount(
-        string flightNumber,
-        ISeatInventoryService service)
-    {
-        return Results.Ok(
-            await service.GetAvailableSeatCountAsync(flightNumber)
-        );
-    }
-
-    private static async Task<IResult> GetTotalFlightSeats(
-        string flightNumber,
-        ISeatInventoryService service)
-    {
-        string[] rawSeats = await service.GetTotalFlightSeatsAsync(flightNumber);
-
-        var structuredSeats = rawSeats.Select(s => {
-            var parts = s.Split(':');
-            return new SeatInfo(parts[0], parts[1]);
-        }).ToArray();
-
-        return Results.Ok(
-            structuredSeats
-        );
-    }
-
-    private static async Task<IResult> GetReservedFlightSeats(
-        string flightNumber,
-        ISeatInventoryService service)
-    {
-        string[] rawSeats = await service.GetReservedFlightSeatsAsync(flightNumber);
-
-        var structuredSeats = rawSeats.Select(s => {
-            var parts = s.Split(':');
-            return new SeatInfo(parts[0], parts[1]);
-        }).ToArray();
-
-        return Results.Ok(
-            structuredSeats
-        );
-    }
-
-    private static async Task<IResult> GetTicketStatus(
-        Guid id,
-        ISeatInventoryService service)
-    {
-        // TODO: implement ticket status retrieval
-        return Results.Ok();
-    }
-
     private static async Task<IResult> Enqueue(
         TicketWaitRequest request,
         IQueueingService service)
     {
-        await service.EnqueueAsync(request.Id, request.RequestTime);
+        await service.EnqueueAsync(request.UserId, request.RequestTime);
         return Results.Ok(
             new PostResponse(true)
         );
     }
 
     private static async Task<IResult> ReserveSeat(
-        TicketSeatRequest request,
+        TicketBookRequest request,
         ISeatInventoryService service)
     {
-        var result = await service.ReserveSeatAsync(request.FlightNumber, request.SeatClass, request.SeatNumber, request.Id);
+        var result = await service.ReserveSeatAsync(request.FlightId, request.SeatNumber, request.UserId);
         // TODO: process return to proper result
         
         return result switch
         {
             { Success: true } =>
                 Results.Created(
-                    $"/tickets/{result.BookingId}",
+                    $"/api/booked/{result.BookingId}",
                     new TicketIssueResponse(
-                        result.BookingId,
-                        result.FlightNumber,
-                        result.SeatNumber,
+                        result.Success,
+                        result.FlightId,
                         result.Date,
-                        result.Details,
-                        result.Success
+                        result.SeatNumber,
+                        result.UserId,
+                        result.BookingId,
+                        result.Details
                     )
                 ),
 
@@ -169,5 +118,15 @@ public static class TicketEndpoint
             _ =>
                 Results.StatusCode(500)
         };
+    }
+
+    private static async Task<IResult> GetBookedStatus(
+        string bookingId,
+        ISeatInventoryService service)
+    {
+        // TODO: build api
+        //var result = await service.GetBookedSeatAsync(bookingId);
+        
+        return Results.Ok();
     }
 }

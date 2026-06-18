@@ -6,7 +6,9 @@ public record SeedDataOptions
 
 public record FlightSeed
 {
-    public string FlightNumber { get; set; }
-    public int SeatCount { get; set; }
-    public string Prefix { get; set; }
+    public required string FlightNumber { get; set; }
+    public required string DepartureTime { get; set; }
+    public required string FlightId { get; set; }
+    public required int SeatCount { get; set; }
+    public required string Prefix { get; set; }
 }
