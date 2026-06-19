@@ -18,13 +18,12 @@ public static class RedisKeys
     /// Generates: flight_instance:{flightNumber}:{departureTime}
     /// Example: flight_instance:AA100:20260617_211500
     /// </summary>
-    public static string FlightInstance(string flightNumber, DateTime departureTime)
+    public static string FlightInstance(string flightNumber, string departureTime)
     {
         // Use a compact, URL/Key-safe date format (yyyyMMdd_HHmmss) 
         // and enforce uppercase for consistency
-        string formattedTime = Format.GetDateString(departureTime);
     
-        return $"{FlightInstanceNamespace}:{flightNumber.ToUpperInvariant()}:{formattedTime}";
+        return $"{FlightInstanceNamespace}:{flightNumber.ToUpperInvariant()}:{departureTime}";
     }
 
     /// <summary>

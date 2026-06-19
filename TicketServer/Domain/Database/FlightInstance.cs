@@ -8,10 +8,10 @@ public class FlightInstance
 {
     [Key]
     public required string FlightNumber { get; init; } 
-    public required DateTime DepartureTime { get; init; }
+    public required string DepartureTime { get; init; }
     public required string FlightId { get; init; }
 
-    public static FlightInstance Create(string flightNumber, DateTime departureTime, string FlightId)
+    public static FlightInstance Create(string flightNumber, string departureTime, string FlightId)
     {
         return new FlightInstance
         {

@@ -40,7 +40,7 @@ public class SeatInventoryService : ISeatInventoryService
         _logger.LogInformation("Computed flight number and departure time. FlightNumber: {FlightNumber}, DepartureTime: {DepartureTime}",
             flightNumber, departureTime);
 
-        var flightInstanceKey = RedisKeys.FlightInstance(flightNumber, (DateTime) Format.FormatDate(departureTime));
+        var flightInstanceKey = RedisKeys.FlightInstance(flightNumber, Format.FormatDate(departureTime));
         var flightSeatCountKey = RedisKeys.FlightSeatCount(flightId);
         var seatLayoutKey = RedisKeys.SeatLayout(flightNumber, seatNumber);
         var flightBookingKey = RedisKeys.FlightBooking(flightId, seatNumber);

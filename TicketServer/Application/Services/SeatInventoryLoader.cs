@@ -36,7 +36,7 @@ public class SeatInventoryLoader(IServiceScopeFactory scopeFactory, ILogger<Seat
             }
 
             // Load seat layouts into Redis
-            var seatLayouts = await seatInventoryRepository.GetSeatLayouts();
+            var seatLayouts = await seatInventoryRepository.GetSeatLayout();
             foreach (var layout in seatLayouts)
             {
                 var key = RedisKeys.SeatLayout(layout.FlightNumber, layout.SeatNumber);

@@ -24,7 +24,7 @@ public class DbInitializer(IServiceScopeFactory scopeFactory,
             foreach (var config in options.Flights)
             {
 
-                DateTime? time = Format.FormatDate(config.DepartureTime);
+                string time = Format.FormatDate(config.DepartureTime);
 
                 if (time == null)
                 {
@@ -32,7 +32,7 @@ public class DbInitializer(IServiceScopeFactory scopeFactory,
                     continue; // Skip this flight and move to the next one
                 }
 
-                var flightId = Computation.ComputeFlightId(config.FlightNumber, (DateTime) time);
+                var flightId = Computation.ComputeFlightId(config.FlightNumber, time);
 
                 var inventory = await flightDbContext.FlightSeatCounts
                     .FirstOrDefaultAsync(f => f.FlightId == flightId);
@@ -60,7 +60,7 @@ public class DbInitializer(IServiceScopeFactory scopeFactory,
                     flightDbContext.FlightInstances.Add(new FlightInstance
                     {
                         FlightId = flightId,
-                        DepartureTime = (DateTime) time,
+                        DepartureTime = time,
                         FlightNumber = config.FlightNumber
                     });
                 }

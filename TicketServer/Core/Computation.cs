@@ -2,11 +2,10 @@ namespace TicketServer.Core
 {
     public static class Computation
     {
-        public static string ComputeFlightId(string flightId, DateTime time)
+        public static string ComputeFlightId(string flightId, string time)
         {
             // Return the formatted string using UTC time
-            var timeString = Format.GetDateString(time);
-            return $"{flightId.Trim()}-{timeString}";
+            return $"{flightId.Trim()}-{time}";
         }
 
         public static string ComputeBookingId(string flightId, string userId) 

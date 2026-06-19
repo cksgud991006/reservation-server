@@ -1,6 +1,7 @@
 using TicketServer.Application.Services;
 using TicketServer.Infrastructure.Redis;
 using TicketServer.Api.Dto;
+using TicketServer.Application.Repositories;
 
 namespace TicketServer.Endpoints;
 
@@ -12,6 +13,12 @@ public static class TicketEndpoint
         app.MapGet("/queue/status/{id}", GetQueueStatus);
         app.MapGet("/active/status/{id}", GetActiveStatus);
         app.MapGet("/api/booked/{bookingId}", GetBookedStatus);
+        app.MapGet("/api/flightId/{flightNumber}/{departureTime}", GetFlightId);
+        app.MapGet("/api/flightInstances", GetFlightInstances);
+        app.MapGet("/api/flightSeatCount/{flightId}", GetFlightSeatCount);
+        app.MapGet("/api/seatLayout/{flightNumber}", GetSeatLayout);
+        app.MapGet("/api/flightBooking/{flightId}", GetFlightBookings);
+        app.MapGet("/api/flightBooking/{flightId}/{seatNumber}", GetFlightBooking);
         
         // POST
         app.MapPost("/queue", Enqueue); 
@@ -75,6 +82,114 @@ public static class TicketEndpoint
         };
     }
 
+    private static async Task<IResult> GetBookedStatus(
+        string bookingId,
+        ISeatInventoryService service)
+    {
+        // TODO: build api
+        //var result = await service.GetBookedSeatAsync(bookingId);
+        
+        return Results.Ok();
+    }
+
+    private static async Task<IResult> GetFlightId(
+        string flightNumber,
+        string departureTime,
+        ISeatInventoryRepository service)
+    {
+        var time = Format.FormatDate(departureTime);
+        var response = await service.GetFlightInstance(flightNumber, time);
+
+        if (response == null)
+        {
+            return Results.NotFound();
+        }
+
+        return Results.Ok(
+            response
+        );
+    }
+    
+    private static async Task<IResult> GetFlightInstances(
+        ISeatInventoryRepository service)
+    {
+        var response = await service.GetFlightInstances();
+
+        if (response == null)
+        {
+            return Results.NotFound();
+        }
+
+        return Results.Ok(
+            response
+        );
+    }
+    
+    private static async Task<IResult> GetFlightSeatCount(
+        string flightId,
+        ISeatInventoryRepository service)
+    {
+        var response = await service.GetFlightSeatCount(flightId);
+
+        if (response == null)
+        {
+            return Results.NotFound();
+        }
+
+        return Results.Ok(
+            response
+        );
+    }
+
+    private static async Task<IResult> GetSeatLayout(
+        string flightNumber,
+        ISeatInventoryRepository service)
+    {
+        var response = await service.GetSeatLayout(flightNumber);
+
+        if (response == null)
+        {
+            return Results.NotFound();
+        }
+
+        return Results.Ok(
+            response
+        );
+    }
+
+    private static async Task<IResult> GetFlightBookings(
+        string flightId,
+        ISeatInventoryRepository service)
+    {
+        var response = await service.GetFlightBookings(flightId);
+
+        if (response == null)
+        {
+            return Results.NotFound();
+        }
+
+        return Results.Ok(
+            response
+        );
+    }
+
+    private static async Task<IResult> GetFlightBooking(
+        string flightId,
+        string seatNumber,
+        ISeatInventoryRepository service)
+    {
+        var response = await service.GetFlightBooking(flightId, seatNumber);
+
+        if (response == null)
+        {
+            return Results.NotFound();
+        }
+
+        return Results.Ok(
+            response
+        );
+    }
+
     private static async Task<IResult> Enqueue(
         TicketWaitRequest request,
         IQueueingService service)
@@ -118,15 +233,5 @@ public static class TicketEndpoint
             _ =>
                 Results.StatusCode(500)
         };
-    }
-
-    private static async Task<IResult> GetBookedStatus(
-        string bookingId,
-        ISeatInventoryService service)
-    {
-        // TODO: build api
-        //var result = await service.GetBookedSeatAsync(bookingId);
-        
-        return Results.Ok();
     }
 }

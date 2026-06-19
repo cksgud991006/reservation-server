@@ -15,7 +15,7 @@ public class SeatInventoryRepository : ISeatInventoryRepository
         _context = context;
     }
 
-    public Task<FlightInstance?> GetFlightInstance(string flightNumber, DateTime departureTime)
+    public Task<FlightInstance?> GetFlightInstance(string flightNumber, string departureTime)
     {
         return _context.FlightInstances
             .Where(s => s.FlightNumber == flightNumber && s.DepartureTime == departureTime)
@@ -43,21 +43,35 @@ public class SeatInventoryRepository : ISeatInventoryRepository
 
     public Task<SeatLayout?> GetSeatLayout(string flightNumber, string seatNumber)
     {
-        return _context.SeatLayouts.FirstOrDefaultAsync(s =>
+        return _context.SeatLayouts.FirstOrDefaultAsync(s  =>
             s.FlightNumber == flightNumber &&
             s.SeatNumber == seatNumber);
     }
 
-    public Task<List<SeatLayout>> GetSeatLayouts()
+    public Task<List<SeatLayout>> GetSeatLayout(string flightNumber)
+    {
+        return _context.SeatLayouts
+            .Where(s  => s.FlightNumber == flightNumber)
+            .ToListAsync();
+    }
+
+    public Task<List<SeatLayout>> GetSeatLayout()
     {
         return _context.SeatLayouts.ToListAsync();
     }
 
-    public Task<FlightBooking?> GetFlightBooking(string flightId)
+    public Task<FlightBooking?> GetFlightBooking(string flightId, string seatNumber)
     {
-        return _context.FlightBookings
-            .Where(s => s.FlightId == flightId)
-            .FirstOrDefaultAsync();
+        return _context.FlightBookings.FirstOrDefaultAsync(s => 
+            s.FlightId == flightId &&
+            s.SeatNumber == seatNumber);
+    }
+
+    public Task<List<FlightBooking>> GetFlightBookings(string flightId)
+    {
+        return _context.FlightBookings.Where(s => 
+            s.FlightId == flightId)
+            .ToListAsync();
     }
 
     public Task<List<FlightBooking>> GetFlightBookings()
