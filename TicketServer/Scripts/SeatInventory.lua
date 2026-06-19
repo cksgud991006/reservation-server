@@ -1,28 +1,30 @@
--- KEYS[1]: available_count_flight_key
--- KEYS[2]: master_flight_key
--- KEYS[3]: reserved_flight_key
--- ARGV[1]: seat_field
-local availableCount = redis.call('GET', KEYS[1])
-local count = tonumber(availableCount)
-if count < 1 then
+-- KEYS[1]: FlightInstanceKey
+-- KEYS[2]: FlightSeatCountKey
+-- KEYS[3]: SeatLayoutKey
+-- KEYS[4]: FlightBookingKey
+-- ARGV[1]: UserId
+
+-- should I write error code definition here? or just return error code and message in the lua script?
+
+-- Step 1: Check if there are any seats available for the flight
+local totalSeatCountStr = redis.call('GET', KEYS[2])
+if not totalSeatCountStr then
+    return {-2, "Flight capacity configuration not found"}
+end
+
+local totalSeatCount = tonumber(totalSeatCountStr)
+local bookedSeatCount = redis.call('SCARD', KEYS[4])
+
+if (totalSeatCount - bookedSeatCount) < 1 then
     return {-2, "No seats available"}
 end
 
-
-local isValidSeat = redis.call('SISMEMBER', KEYS[2], ARGV[1])
-
--- Step 1: Validate if the seat is valid (exists in master flight key)
-if isValidSeat == 0 then
-    return {-1, "Seat is not valid"}
-end
-
 -- Step 2: Check if the seat is already reserved in the reserved flight key
-local isOccupied = redis.call('SISMEMBER', KEYS[3], ARGV[1])
+local isOccupied = redis.call('SISMEMBER', KEYS[4], ARGV[1])
 
 if isOccupied == 1 then
     return {0, "Seat is already occupied"}
 else
-    redis.call('SADD', KEYS[3], ARGV[1])
-    redis.call('DECR', KEYS[1])
+    redis.call('SADD', KEYS[4], ARGV[1])
     return {1, "Seat booked successfully"}
 end

@@ -1,7 +1,7 @@
 namespace TicketServer.Schedule;
 
-public interface IJobScheduler
+public interface IJobScheduler<T>
 {
-    Task<int> GetWaitingPositionAsync(Guid id);
-    Task ScheduleAsync(Guid id, DateTimeOffset scheduleTime);
+    Task<int> GetWaitingPositionAsync(T id);
+    Task ScheduleAsync(T payload, DateTimeOffset scheduleTime);
 }

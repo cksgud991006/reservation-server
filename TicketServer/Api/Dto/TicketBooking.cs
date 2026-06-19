@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using TicketServer.Domain.Seats;
 
 namespace TicketServer.Api.Dto;
 
@@ -7,42 +6,36 @@ public record PostResponse(
     [Required] bool Success
 );
 
-public record SeatInfo(
-    [Required] string SeatClass,
-    [Required] string SeatNumber
-);
-
-public record TicketSeatRequest(
-    [Required] string FlightNumber,
-    [Required] DateTimeOffset Date,
-    [Required] ClassType SeatClass,
+public record TicketBookRequest(
+    [Required] string FlightId,
     [Required] string SeatNumber,
-    [Required] Guid Id
+    [Required] Guid UserId
 );
 
 public record TicketWaitRequest(
-    [Required] Guid Id,
+    [Required] Guid UserId,
     [Required] DateTimeOffset RequestTime,
     [Required] string IdempotencyKey
 );
 
 public record TicketWaitResponse(
-    [Required] Guid Id,
+    [Required] Guid UserId,
     [Required] int Position
 );
 
 public record TicketSessionResponse(
-    [Required] Guid Id,
+    [Required] Guid UserId,
     [Required] long TimeExpiry
 );
 
 public record TicketIssueResponse(
-    [Required] Guid Id,
-    [Required] string FlightNumber,
-    [Required] string SeatNumber,
+    [Required] bool Success,
+    [Required] string FlightId,
     [Required] DateTimeOffset Date,
-    [Required] string Details,
-    [Required] bool Success
+    [Required] string SeatNumber,
+    [Required] Guid UserId,
+    [Required] string BookingId,
+    [Required] string Details
 );
 
 public record TicketIssueFailure(

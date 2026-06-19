@@ -1,8 +1,8 @@
 using TicketServer.Domain.Response;
 
-namespace TicketServer.Application.Services;
+namespace TicketServer.Infrastructure.Redis;
 
-public interface ISessionService
+public interface IRedisSession
 {
     public Task<SessionStatusResponse> GetSessionStatusAsync(
         Guid id);

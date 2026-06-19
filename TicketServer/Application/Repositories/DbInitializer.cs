@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using TicketServer.Domain.Seats;
+using TicketServer.Domain.Database;
 using TicketServer.Infrastructure.Database;
 using TicketServer.Domain.Seed;
+using TicketServer.Core;
 
 namespace TicketServer.Application.Repositories;
 
@@ -14,45 +15,58 @@ public class DbInitializer(IServiceScopeFactory scopeFactory,
     {
         using (IServiceScope scope = scopeFactory.CreateScope())
         {
-            var seatContext = scope.ServiceProvider.GetRequiredService<SeatContext>();
+            var flightDbContext = scope.ServiceProvider.GetRequiredService<FlightDbContext>();
             
-            seatContext.Database.Migrate();
+            await flightDbContext.Database.MigrateAsync(cancellationToken);
 
             var options = configuration.GetSection("SeedData").Get<SeedDataOptions>();
 
             foreach (var config in options.Flights)
             {
-                // 1. Check/Add Flight Inventory
-                var inventory = await seatContext.FlightInventories
-                    .FirstOrDefaultAsync(f => f.FlightNumber == config.FlightNumber);
+
+                string time = Format.FormatDate(config.DepartureTime);
+
+                if (time == null)
+                {
+                    logger.LogError("Invalid departure time format for flight {FlightNumber}: {DepartureTime}", config.FlightNumber, config.DepartureTime);
+                    continue; // Skip this flight and move to the next one
+                }
+
+                var flightId = Computation.ComputeFlightId(config.FlightNumber, time);
+
+                var inventory = await flightDbContext.FlightSeatCounts
+                    .FirstOrDefaultAsync(f => f.FlightId == flightId);
 
                 if (inventory == null)
                 {
-                    inventory = new FlightInventory
+                    // 1. Check/Add Flight
+                    inventory = new FlightSeatCount
                     {
-                        FlightNumber = config.FlightNumber,
-                        TotalSeats = config.SeatCount,
-                        AvailableSeats = config.SeatCount
+                        FlightId = flightId,
+                        TotalSeatCount = config.SeatCount,
                     };
-                    seatContext.FlightInventories.Add(inventory);
-                }
-
-                // 2. Check/Add Seats for this flight
-                var existingSeatsCount = await seatContext.Seats
-                    .CountAsync(s => s.FlightNumber == config.FlightNumber);
-                if (existingSeatsCount < config.SeatCount)
-                {
-                    var seatsToAdd = new List<Seat>();
-                    for (int i = existingSeatsCount; i < config.SeatCount; ++i)
+                    flightDbContext.FlightSeatCounts.Add(inventory);
+    
+                    // 2. Check/Add Seat Layout for the flight
+                    var seatsToAdd = new List<SeatLayout>();
+                    for (int i = 0; i < config.SeatCount; ++i)
                     {
-                        seatsToAdd.Add(Seat.Create(config.FlightNumber, ClassType.Economy, $"{i}{config.Prefix}", SeatStatus.Available));
+                        seatsToAdd.Add(SeatLayout.Create(config.FlightNumber, ClassType.Economy, $"{i}{config.Prefix}"));
                     }
 
-                    seatContext.Seats.AddRange(seatsToAdd);
+                    flightDbContext.SeatLayouts.AddRange(seatsToAdd);
+
+                    // 3. Check/Add Flight Instance
+                    flightDbContext.FlightInstances.Add(new FlightInstance
+                    {
+                        FlightId = flightId,
+                        DepartureTime = time,
+                        FlightNumber = config.FlightNumber
+                    });
                 }
             }
             
-            await seatContext.SaveChangesAsync(cancellationToken);
+            await flightDbContext.SaveChangesAsync(cancellationToken);
         }
     }
 

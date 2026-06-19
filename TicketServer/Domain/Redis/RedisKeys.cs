@@ -1,32 +1,61 @@
-using System.ComponentModel;
-using System.Globalization;
-using StackExchange.Redis;
-using TicketServer.Domain.Seats;
+using System;
+using TicketServer.Domain.Database;
 
 namespace TicketServer.Domain.Redis;
 
 public static class RedisKeys
 {
-    public const string JobWaitingKey = "job:waiting:zset";
-    public const string JobActiveKey = "job:active:zset";
-    public const string SeatInventoryPrefix = "flight";
-    public const string MasterFlightKeyPrefix = "all";
-    public const string ReservedFlightKeyPrefix = "occupied";
+    // Queue keys for the high-concurrency ticket scheduling pipeline
+    public const string QueueWaitKey = "queue:waiting:zset";
+    public const string QueueActiveKey = "queue:active:zset";
+    public const string SqlTaskKey = "sql:tasks:list";
+    private const string FlightInstanceNamespace = "flight_instance";
+    private const string FlightSeatCountNamespace = "flight_seat_count";
+    private const string SeatLayoutNamespace = "seat_layout";
+    private const string FlightBookingNamespace = "flight_booking";
 
-    // Key to store the count of available seats for a flight, e.g., "flight:available_count:AA123:2024-07-01T00:00:00Z": 150
-    public static string GetFlightAvailableCountKey(string flightNumber) 
-        => $"{SeatInventoryPrefix}:available_count:{flightNumber}";
+    /// <summary>
+    /// Generates: flight_instance:{flightNumber}:{departureTime}
+    /// Example: flight_instance:AA100:20260617_211500
+    /// </summary>
+    public static string FlightInstance(string flightNumber, string departureTime)
+    {
+        // Use a compact, URL/Key-safe date format (yyyyMMdd_HHmmss) 
+        // and enforce uppercase for consistency
+    
+        return $"{FlightInstanceNamespace}:{flightNumber.ToUpperInvariant()}:{departureTime}";
+    }
 
-    // Key to store all available seats for a flight, e.g., "flight:all:AA123:2024-07-01T00:00:00Z": "ECONOMY:C167"
-    public static string GetMasterFlightKey(string flightNumber) 
-        => $"{SeatInventoryPrefix}:{MasterFlightKeyPrefix}:{flightNumber}";
+    /// <summary>
+    /// Generates: flight_seat_count:{flightId}
+    /// </summary>
+    public static string FlightSeatCount(string flightId)
+    {
+        return $"{FlightSeatCountNamespace}:{flightId}";
+    }
 
+    /// <summary>
+    /// Generates: seat_layout:{flightNumber}:{seatNumber}
+    /// </summary>
+    public static string SeatLayout(string flightNumber, string seatNumber) 
+        => $"{SeatLayoutNamespace}:{flightNumber.ToUpperInvariant()}:{seatNumber.ToUpperInvariant()}";
 
-    // Key to store reserved seats for a flight, e.g., "flight:occupied:AA123:2024-07-01T00:00:00Z": "ECONOMY:C167"
-    public static string GetReservedFlightKey(string flightNumber) 
-        => $"{SeatInventoryPrefix}:{ReservedFlightKeyPrefix}:{flightNumber}";
+    /// <summary>
+    /// Generates: flight_booking:{flightId}:{seatNumber}
+    /// </summary>
+    public static string FlightBooking(string flightId, string seatNumber)
+    {
+        return $"{FlightBookingNamespace}:{flightId}:{seatNumber.ToUpperInvariant()}";
+    }
 
-    // Key to represent a specific seat, e.g., "ECONOMY:C167"
-    public static string GetSeatField(ClassType classType, string seatId)
-        => $"{classType}:{seatId}";
+    /// <summary>
+    /// Standardized hash field or set member identifier for a unique seat.
+    /// e.g., "ECONOMY:C167"
+    /// </summary>
+    public static string GetSeatField(ClassType classType, string seatNumber)
+        => $"{classType.ToString().ToUpperInvariant()}:{Sanitize(seatNumber)}";
+
+    private static string Sanitize(string input) 
+        => input?.Trim().ToUpperInvariant() ?? throw new ArgumentNullException(nameof(input));
+
 }

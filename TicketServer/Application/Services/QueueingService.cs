@@ -6,8 +6,8 @@ namespace TicketServer.Application.Services;
 
 public class QueueingService: IQueueingService
 {
-    private readonly IJobScheduler _jobScheduler;
-    public QueueingService(IJobScheduler jobScheduler)
+    private readonly IJobScheduler<Guid> _jobScheduler;
+    public QueueingService(IJobScheduler<Guid> jobScheduler)
     {
         _jobScheduler = jobScheduler;   
     }

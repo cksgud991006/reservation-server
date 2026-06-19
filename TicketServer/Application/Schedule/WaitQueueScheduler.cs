@@ -5,17 +5,17 @@ using TicketServer.Domain.Redis;
 
 namespace TicketServer.Schedule;
 
-public class JobScheduler : IJobScheduler
+public class WaitQueueScheduler : IJobScheduler<Guid>
 {
     private readonly IDatabase _redis;
-    public JobScheduler(IConnectionMultiplexer connectionMultiplexer)
+    public WaitQueueScheduler(IConnectionMultiplexer connectionMultiplexer)
     {
         _redis = connectionMultiplexer.GetDatabase();
     }
 
     public async Task<int> GetWaitingPositionAsync(Guid id)
     {
-        var rank = await _redis.SortedSetRankAsync(RedisKeys.JobWaitingKey, id.ToString());
+        var rank = await _redis.SortedSetRankAsync(RedisKeys.QueueWaitKey, id.ToString());
         if (rank.HasValue)
         {
             return (int)rank.Value + 1; // Convert zero-based rank to one-based position
@@ -26,6 +26,6 @@ public class JobScheduler : IJobScheduler
 
     public async Task ScheduleAsync(Guid id, DateTimeOffset scheduleTime)
     {
-        await _redis.SortedSetAddAsync(RedisKeys.JobWaitingKey, id.ToString(), scheduleTime.ToUnixTimeSeconds());
+        await _redis.SortedSetAddAsync(RedisKeys.QueueWaitKey, id.ToString(), scheduleTime.ToUnixTimeSeconds());
     }
 }
