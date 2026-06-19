@@ -3,6 +3,8 @@ using TicketServer.Domain.Redis;
 using StackExchange.Redis;
 using TicketServer.Domain.Response;
 using TicketServer.Core;
+using TicketServer.Api.Dto;
+using TicketServer.Schedule;
 
 namespace TicketServer.Application.Services;
 public class SeatInventoryService : ISeatInventoryService
@@ -10,21 +12,24 @@ public class SeatInventoryService : ISeatInventoryService
     private readonly ILogger<SeatInventoryService> _logger;
     private readonly ISeatInventoryRepository _seatInventoryRepository;
     private readonly IDatabase _redis;
+    private readonly IJobScheduler<SqlTask> _jobScheduler;
 
     public SeatInventoryService(ILogger<SeatInventoryService> logger,
                               ISeatInventoryRepository seatInventoryRepository,
-                              IConnectionMultiplexer connectionMultiplexer)
+                              IConnectionMultiplexer connectionMultiplexer,
+                              IJobScheduler<SqlTask> jobScheduler)
     {
         _logger = logger;           
         _seatInventoryRepository = seatInventoryRepository;
         _redis = connectionMultiplexer.GetDatabase();
+        _jobScheduler = jobScheduler;
     }
 
     public async Task<SeatInventoryResponse> ReserveSeatAsync(string flightId, string seatNumber, Guid id)
     {
         _logger.LogInformation("Received seat reservation request. FlightId: {FlightId}, SeatNumber: {SeatNumber}, UserId: {UserId}",
             flightId, seatNumber, id);
-        var pos = await _redis.SortedSetRankAsync(RedisKeys.JobActiveKey, id.ToString());
+        var pos = await _redis.SortedSetRankAsync(RedisKeys.QueueActiveKey, id.ToString());
         if (pos == null) {
             return SeatInventoryResponse.CreateFailureResponse(flightId, seatNumber, id, "User is not in the active queue.");
         }
@@ -65,6 +70,17 @@ public class SeatInventoryService : ISeatInventoryService
                 var seat = await _seatInventoryRepository.GetSeat(flightNumber, classType, seatNumber);
                 await _seatRepository.UpdateSeatStatus(seat!, SeatStatus.Held, id.ToString());
                 */
+                var sqlTask = new SqlTask
+                (
+                    TaskType.BookSeat,
+                    flightId,
+                    seatNumber,
+                    id
+                );
+
+                var currentTime = DateTimeOffset.UtcNow;
+
+                await _jobScheduler.ScheduleAsync(sqlTask, currentTime); // run background job to update db asynchronously
                 return SeatInventoryResponse.CreateSuccessResponse(flightId, seatNumber, id, bookingId, details);
             case -1:
                 return SeatInventoryResponse.CreateFailureResponse(flightId, seatNumber, id, details);

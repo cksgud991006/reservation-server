@@ -843,7 +843,7 @@
           <collectionProp name="Arguments.arguments">
             <elementProp name="sharedGuid" elementType="Argument">
               <stringProp name="Argument.name">sharedGuid</stringProp>
-              <stringProp name="Argument.value">${__UUID()}</stringProp>
+              <stringProp name="Argument.value">ce5e7b74-5054-46f1-91be-e8679f5954f3</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
           </collectionProp>

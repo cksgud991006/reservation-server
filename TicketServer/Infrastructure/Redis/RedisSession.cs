@@ -16,7 +16,7 @@ public class RedisSession: IRedisSession
     public async Task<SessionStatusResponse> GetSessionStatusAsync(
         Guid id)
     {
-        var key = RedisKeys.JobActiveKey;
+        var key = RedisKeys.QueueActiveKey;
         var score = await _redis.SortedSetScoreAsync(key, id.ToString());
 
         if (!score.HasValue)

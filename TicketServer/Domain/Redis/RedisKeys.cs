@@ -6,8 +6,9 @@ namespace TicketServer.Domain.Redis;
 public static class RedisKeys
 {
     // Queue keys for the high-concurrency ticket scheduling pipeline
-    public const string JobWaitingKey = "job:waiting:zset";
-    public const string JobActiveKey = "job:active:zset";
+    public const string QueueWaitKey = "queue:waiting:zset";
+    public const string QueueActiveKey = "queue:active:zset";
+    public const string SqlTaskKey = "sql:tasks:list";
     private const string FlightInstanceNamespace = "flight_instance";
     private const string FlightSeatCountNamespace = "flight_seat_count";
     private const string SeatLayoutNamespace = "seat_layout";

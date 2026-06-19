@@ -18,5 +18,5 @@ public interface ISeatInventoryRepository
      Task AddFlightInstance(FlightInstance flightInstance);
      Task AddFlightSeatCount(FlightSeatCount flightSeatCount);
      Task AddSeatLayout(SeatLayout seatLayout);
-     Task AddBooking(string flightId, string seatNumber, string userId);
+     Task AddBooking(string flightId, string seatNumber, Guid userId);
 }

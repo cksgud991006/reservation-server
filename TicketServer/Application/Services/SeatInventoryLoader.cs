@@ -50,7 +50,7 @@ public class SeatInventoryLoader(IServiceScopeFactory scopeFactory, ILogger<Seat
             foreach (var booking in bookings)
             {
                 var key = RedisKeys.FlightBooking(booking.FlightId, booking.SeatNumber);
-                var val = booking.UserId;
+                var val = booking.UserId.ToString();
                 logger.LogInformation("Loading flight booking into Redis: {Key} -> {Value}", key, val);
                 await redis.SetAddAsync(key, val).WaitAsync(cancellationToken);
             }

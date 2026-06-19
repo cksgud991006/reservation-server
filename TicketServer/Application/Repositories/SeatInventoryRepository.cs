@@ -120,7 +120,7 @@ public class SeatInventoryRepository : ISeatInventoryRepository
         return Task.CompletedTask;
     }
     
-    public Task AddBooking(string flightId, string seatNumber, string userId)
+    public Task AddBooking(string flightId, string seatNumber, Guid userId)
     {
         var booking = new FlightBooking
         {
