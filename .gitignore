@@ -9,7 +9,7 @@
 appsettings.json
 
 # db files
-**/Migrations/*
+#**/Migrations/*
 
 # log files
 note.txt
