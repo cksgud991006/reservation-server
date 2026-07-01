@@ -5,7 +5,7 @@ using TicketServer.Domain.Redis;
 using TicketServer.Api.Dto;
 using System.Text.Json;
 
-namespace TicketServer.Schedule;
+namespace TicketServer.Application.Schedule;
 
 public class SqlTaskScheduler : IJobScheduler<SqlTask>
 {

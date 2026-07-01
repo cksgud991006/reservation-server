@@ -2,10 +2,10 @@ using NRedisStack;
 using NRedisStack.RedisStackCommands;
 using StackExchange.Redis;
 using TicketServer.Domain.Redis;
-using TicketServer.Schedule;
+using TicketServer.Application.Schedule;
 
 
-namespace TicketServer.Application.Services;
+namespace TicketServer.Application.BackgroundJobs;
  
 public class WaitQueueRunner : BackgroundService, IJobRunner<Guid>
 {

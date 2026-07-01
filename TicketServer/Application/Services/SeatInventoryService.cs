@@ -4,7 +4,7 @@ using StackExchange.Redis;
 using TicketServer.Domain.Response;
 using TicketServer.Core;
 using TicketServer.Api.Dto;
-using TicketServer.Schedule;
+using TicketServer.Application.Schedule;
 
 namespace TicketServer.Application.Services;
 public class SeatInventoryService : ISeatInventoryService

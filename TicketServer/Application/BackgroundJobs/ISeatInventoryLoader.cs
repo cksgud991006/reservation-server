@@ -1,4 +1,4 @@
-namespace TicketServer.Application.Services;
+namespace TicketServer.Application.BackgroundJobs;
 
 public interface ISeatInventoryLoader : IHostedService
 {

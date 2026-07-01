@@ -3,7 +3,7 @@ using NRedisStack.RedisStackCommands;
 using StackExchange.Redis;
 using TicketServer.Domain.Redis;
 
-namespace TicketServer.Schedule;
+namespace TicketServer.Application.Schedule;
 
 public class WaitQueueScheduler : IJobScheduler<Guid>
 {

@@ -2,12 +2,13 @@ using NRedisStack;
 using NRedisStack.RedisStackCommands;
 using StackExchange.Redis;
 using TicketServer.Domain.Redis;
-using TicketServer.Schedule;
+using TicketServer.Application.Schedule;
+using TicketServer.Application.Services;
 using TicketServer.Infrastructure.Database;
 using TicketServer.Api.Dto;
 using System.Text.Json;
 
-namespace TicketServer.Application.Services;
+namespace TicketServer.Application.BackgroundJobs;
  
 public class SqlTaskRunner : BackgroundService, IJobRunner<SqlTask>
 {

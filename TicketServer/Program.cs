@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore;
-using TicketServer.Endpoints;
+using TicketServer.Api.Endpoints;
 using TicketServer.Application.Services;
 using TicketServer.Application.Repositories;
+using TicketServer.Application.BackgroundJobs;
 using TicketServer.Infrastructure.Database;
 using TicketServer.Infrastructure.Redis;
 using StackExchange.Redis;
-using TicketServer.Schedule;
+using TicketServer.Application.Schedule;
 using TicketServer.Api.Dto;
 
 var builder = WebApplication.CreateBuilder(args);

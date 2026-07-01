@@ -2,7 +2,7 @@ using StackExchange.Redis;
 using TicketServer.Domain.Redis;
 using TicketServer.Application.Repositories;
 
-namespace TicketServer.Application.Services;
+namespace TicketServer.Application.BackgroundJobs;
 
 public class SeatInventoryLoader(IServiceScopeFactory scopeFactory, ILogger<SeatInventoryLoader> logger): IHostedService
 {

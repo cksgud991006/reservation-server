@@ -5,7 +5,7 @@ using TicketServer.Infrastructure.Database;
 using TicketServer.Domain.Seed;
 using TicketServer.Core;
 
-namespace TicketServer.Application.Repositories;
+namespace TicketServer.Application.BackgroundJobs;
 
 public class DbInitializer(IServiceScopeFactory scopeFactory, 
                            IConfiguration configuration,

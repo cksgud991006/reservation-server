@@ -1,6 +1,6 @@
 using TicketServer.Application.Repositories;
 using TicketServer.Domain.Response;
-using TicketServer.Schedule;
+using TicketServer.Application.Schedule;
 
 namespace TicketServer.Application.Services;
 

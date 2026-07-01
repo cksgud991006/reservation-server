@@ -3,7 +3,7 @@ using TicketServer.Infrastructure.Redis;
 using TicketServer.Api.Dto;
 using TicketServer.Application.Repositories;
 
-namespace TicketServer.Endpoints;
+namespace TicketServer.Api.Endpoints;
 
 public static class TicketEndpoint
 {

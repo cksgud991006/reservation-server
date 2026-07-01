@@ -1,4 +1,4 @@
-namespace TicketServer.Schedule;
+namespace TicketServer.Application.Schedule;
 
 public interface IJobScheduler<T>
 {
