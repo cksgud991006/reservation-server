@@ -2,6 +2,7 @@ using TicketServer.Application.Services;
 using TicketServer.Infrastructure.Redis;
 using TicketServer.Api.Dto;
 using TicketServer.Application.Repositories;
+using TicketServer.Core;
 
 namespace TicketServer.Api.Endpoints;
 
@@ -28,7 +29,7 @@ public static class TicketEndpoint
 
     private static async Task<IResult> GetQueueStatus(
         Guid id,
-        IQueueingService service)
+        IQueueService service)
     {
         // polling queue status from redis
         var queueResponse = await service.GetPositionInQueueAsync(id);
@@ -192,11 +193,11 @@ public static class TicketEndpoint
 
     private static async Task<IResult> Enqueue(
         TicketWaitRequest request,
-        IQueueingService service)
+        IQueueService service)
     {
         await service.EnqueueAsync(request.UserId, request.RequestTime);
         return Results.Ok(
-            new PostResponse(true)
+            new EnqueueResponse(true)
         );
     }
 
@@ -212,7 +213,7 @@ public static class TicketEndpoint
             { Success: true } =>
                 Results.Created(
                     $"/api/booked/{result.BookingId}",
-                    new TicketIssueResponse(
+                    new TicketBookResponse(
                         result.Success,
                         result.FlightId,
                         result.Date,
@@ -225,7 +226,7 @@ public static class TicketEndpoint
 
             { Success: false } =>
                 Results.Conflict(
-                    new TicketIssueFailure(
+                    new TicketBookFailureResponse(
                         result.Details,
                         result.Success
                     )

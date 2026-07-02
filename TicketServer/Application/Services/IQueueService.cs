@@ -2,7 +2,7 @@ using TicketServer.Domain.Response;
 
 namespace TicketServer.Application.Services;
 
-public interface IQueueingService
+public interface IQueueService
 {
     public Task<QueueResponse> GetPositionInQueueAsync(
         Guid id);

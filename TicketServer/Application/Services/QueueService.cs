@@ -4,10 +4,10 @@ using TicketServer.Application.Schedule;
 
 namespace TicketServer.Application.Services;
 
-public class QueueingService: IQueueingService
+public class QueueService: IQueueService
 {
     private readonly IJobScheduler<Guid> _jobScheduler;
-    public QueueingService(IJobScheduler<Guid> jobScheduler)
+    public QueueService(IJobScheduler<Guid> jobScheduler)
     {
         _jobScheduler = jobScheduler;   
     }

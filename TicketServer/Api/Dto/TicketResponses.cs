@@ -2,20 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TicketServer.Api.Dto;
 
-public record PostResponse(
+public record EnqueueResponse(
     [Required] bool Success
-);
-
-public record TicketBookRequest(
-    [Required] string FlightId,
-    [Required] string SeatNumber,
-    [Required] Guid UserId
-);
-
-public record TicketWaitRequest(
-    [Required] Guid UserId,
-    [Required] DateTimeOffset RequestTime,
-    [Required] string IdempotencyKey
 );
 
 public record TicketWaitResponse(
@@ -28,7 +16,7 @@ public record TicketSessionResponse(
     [Required] long TimeExpiry
 );
 
-public record TicketIssueResponse(
+public record TicketBookResponse(
     [Required] bool Success,
     [Required] string FlightId,
     [Required] DateTimeOffset Date,
@@ -38,7 +26,7 @@ public record TicketIssueResponse(
     [Required] string Details
 );
 
-public record TicketIssueFailure(
+public record TicketBookFailureResponse(
     [Required] string Details,
     [Required] bool Success
 );

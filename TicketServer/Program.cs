@@ -34,7 +34,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Conn
 builder.Services.AddSingleton<ISqlTaskProcessor, BookSqlTaskProcessor>();
 builder.Services.AddScoped<IJobScheduler<Guid>, WaitQueueScheduler>();
 builder.Services.AddScoped<IJobScheduler<SqlTask>, SqlTaskScheduler>();
-builder.Services.AddScoped<IQueueingService, QueueingService>();
+builder.Services.AddScoped<IQueueService, QueueService>();
 builder.Services.AddScoped<IRedisSession, RedisSession>();
 builder.Services.AddScoped<ISeatInventoryService, SeatInventoryService>();
 builder.Services.AddScoped<ISeatInventoryRepository, SeatInventoryRepository>();

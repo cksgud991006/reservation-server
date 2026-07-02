@@ -9,12 +9,12 @@ using TicketServer.Application.Schedule;
 namespace TicketServer.Application.Services;
 public class SeatInventoryService : ISeatInventoryService
 {
-    private readonly ILogger<SeatInventoryService> _logger;
+    private readonly ILogger<ISeatInventoryService> _logger;
     private readonly ISeatInventoryRepository _seatInventoryRepository;
     private readonly IDatabase _redis;
     private readonly IJobScheduler<SqlTask> _jobScheduler;
 
-    public SeatInventoryService(ILogger<SeatInventoryService> logger,
+    public SeatInventoryService(ILogger<ISeatInventoryService> logger,
                               ISeatInventoryRepository seatInventoryRepository,
                               IConnectionMultiplexer connectionMultiplexer,
                               IJobScheduler<SqlTask> jobScheduler)
@@ -49,7 +49,7 @@ public class SeatInventoryService : ISeatInventoryService
             flightInstanceKey, flightSeatCountKey, seatLayoutKey, flightBookingKey, id);
 
         var result = await _redis.ScriptEvaluateAsync(
-            RedisLuaScripts.LoadSeatInventoryScript.ExecutableScript,
+            RedisLuaScripts.ReserveSeatScript.ExecutableScript,
             [flightInstanceKey, flightSeatCountKey, seatLayoutKey, flightBookingKey],
             [id.ToString()]);
         
@@ -72,7 +72,7 @@ public class SeatInventoryService : ISeatInventoryService
                 */
                 var sqlTask = new SqlTask
                 (
-                    TaskType.BookSeat,
+                    SqlTaskType.BookSeat,
                     flightId,
                     seatNumber,
                     id
