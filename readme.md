@@ -1,5 +1,5 @@
-# Ticket Booking Engine (Concurrency Mock)
-A high-performance .NET backend designed to simulate and solve the challenges of high-concurrency ticket issuance. This project focuses on maintaining strict data integrity when hundreds of users compete for limited inventory (e.g., a single seat).
+# Reservation Booking Engine (Concurrency Mock)
+A high-performance .NET backend designed to simulate and solve the challenges of high-concurrency seat reservation. This project focuses on maintaining strict data integrity when hundreds of users compete for limited inventory (e.g., a single seat).
 
 ## Technical Focus
 * Race Condition Mitigation: Implementing strategies to prevent "double-booking" during sub-millisecond request bursts.
