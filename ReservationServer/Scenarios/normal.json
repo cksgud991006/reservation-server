@@ -1,7 +1,7 @@
 {
     "SeedData": {
         "Flights": [
-            { "FlightNumber": "AA123", "SeatCount": 200, "Prefix": "A", "DepartureTime": "2024-07-01T10:00:00Z" },
+            { "FlightNumber": "AA123", "SeatCount": 200, "Prefix": "A", "DepartureTime": "2023-10-01T10:00:00Z" },
             { "FlightNumber": "BB456", "SeatCount": 150, "Prefix": "B", "DepartureTime": "2024-07-01T12:00:00Z" },
             { "FlightNumber": "CC789", "SeatCount": 180, "Prefix": "C", "DepartureTime": "2024-07-01T14:00:00Z" }
         ]

@@ -100,7 +100,7 @@ public class ReservationApiTests : IClassFixture<CustomWebApplicationFactory>
     public async Task GetFlightBooking_ReturnsOk()
     {
         // Act
-        var bookingId = "AA123-2023-10-01T10:00:00Z-12A-123e4567-e89b-12d3-a456-426614174000";
+        var bookingId = "AA123-2023-10-01T10:00:00Z-123e4567-e89b-12d3-a456-426614174000";
         var response = await _client.GetAsync($"/api/bookings/{bookingId}");
 
         // Assert: HTTP response status code is OK
@@ -111,7 +111,7 @@ public class ReservationApiTests : IClassFixture<CustomWebApplicationFactory>
     public async Task GetFlightBooking_ReturnsNotFound()
     {
         // Act
-        var bookingId = "AA123-2023-10-01T10:00:00Z-12A-123e4567-e89b-12d3-a456-426614174000";
+        var bookingId = "AA-2023-10-01T10:00:00Z-1A-123e4567-e89b-12d3-a456-426614174120";
         var response = await _client.GetAsync($"/api/bookings/{bookingId}");
 
         // Assert: HTTP response status code is NotFound
@@ -124,8 +124,8 @@ public class ReservationApiTests : IClassFixture<CustomWebApplicationFactory>
     {
         // Act
         var flightId = "AA123-2023-10-01T10:00:00Z";
-        var seatNumber = "12A";
-        var userId = Guid.NewGuid();
+        var seatNumber = "1A";
+        var userId = "123e4567-e89b-12d3-a456-426614174001";
         var response = await _client.PostAsync("/api/bookings", JsonContent.Create(new
         {
             FlightId = flightId,
@@ -143,7 +143,7 @@ public class ReservationApiTests : IClassFixture<CustomWebApplicationFactory>
         // Act
         var flightId = "AA-2023-10-01T10:00:00Z";
         var seatNumber = "12A";
-        var userId = Guid.NewGuid();
+        var userId = "123e4567-e89b-12d3-a456-426614174001";
         var response = await _client.PostAsync("/api/bookings", JsonContent.Create(new
         {
             FlightId = flightId,
@@ -155,23 +155,12 @@ public class ReservationApiTests : IClassFixture<CustomWebApplicationFactory>
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
-    [Fact]
-    public async Task GetBookedStatus_ReturnsOk()
-    {
-        // Act
-        var bookingId = "AA123-2023-10-01T10:00:00Z-12A-123e4567-e89b-12d3-a456-426614174000";
-        var response = await _client.GetAsync($"/api/bookings/{bookingId}");
-
-        // Assert: HTTP response status code is OK
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    }
-
     // Queue
     [Fact]
     public async Task PostEnqueue_ReturnsOk()
     {
         // Act
-        var id = Guid.NewGuid();
+        var id = "123e4567-e89b-12d3-a456-426614173330";
         var requestTime = DateTimeOffset.UtcNow;
         var idempotencyKey = Guid.NewGuid().ToString();
         var response = await _client.PostAsync("/api/queue", JsonContent.Create(new
@@ -189,7 +178,7 @@ public class ReservationApiTests : IClassFixture<CustomWebApplicationFactory>
     public async Task GetQueueStatus_ReturnsOk()
     {
         // Act
-        var id = Guid.NewGuid();
+        var id = "123e4567-e89b-12d3-a456-426614173330";
         var response = await _client.GetAsync($"/api/queue/{id}");
 
         // Assert: HTTP response status code is OK
@@ -201,7 +190,7 @@ public class ReservationApiTests : IClassFixture<CustomWebApplicationFactory>
     public async Task GetSessionStatus_ReturnsOk()
     {
         // Act
-        var id = Guid.NewGuid();
+        var id = "123e4567-e89b-12d3-a456-426614173330";
         var response = await _client.GetAsync($"/api/sessions/{id}");
 
         // Assert: HTTP response status code is OK

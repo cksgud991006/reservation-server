@@ -15,36 +15,41 @@ public class DbInitializer(IServiceScopeFactory scopeFactory,
     {
         using (IServiceScope scope = scopeFactory.CreateScope())
         {
+            logger.LogInformation("Starting database initialization...");
+
             var flightDbContext = scope.ServiceProvider.GetRequiredService<FlightDbContext>();
             
             await flightDbContext.Database.MigrateAsync(cancellationToken);
 
             var options = configuration.GetSection("SeedData").Get<SeedDataOptions>();
 
-            foreach (var config in options.Flights)
+            var inventory = await flightDbContext.FlightSeatCounts.FirstOrDefaultAsync(cancellationToken);
+
+            // Builds data if first time running the application
+            if (inventory == null)
             {
+                logger.LogInformation("Seeding initial flight data into the database...");
 
-                string time = Format.FormatDate(config.DepartureTime);
-
-                if (time == null)
+                foreach (var config in options.Flights)
                 {
-                    logger.LogError("Invalid departure time format for flight {FlightNumber}: {DepartureTime}", config.FlightNumber, config.DepartureTime);
-                    continue; // Skip this flight and move to the next one
-                }
 
-                var flightId = Computation.ComputeFlightId(config.FlightNumber, time);
+                    string time = Format.FormatDate(config.DepartureTime);
 
-                var inventory = await flightDbContext.FlightSeatCounts
-                    .FirstOrDefaultAsync(f => f.FlightId == flightId);
+                    if (time == null)
+                    {
+                        logger.LogError("Invalid departure time format for flight {FlightNumber}: {DepartureTime}", config.FlightNumber, config.DepartureTime);
+                        continue; // Skip this flight and move to the next one
+                    }
 
-                if (inventory == null)
-                {
+                    var flightId = Computation.ComputeFlightId(config.FlightNumber, time);
+
                     // 1. Check/Add Flight
                     inventory = new FlightSeatCount
                     {
                         FlightId = flightId,
                         TotalSeatCount = config.SeatCount,
                     };
+                    
                     flightDbContext.FlightSeatCounts.Add(inventory);
     
                     // 2. Check/Add Seat Layout for the flight
@@ -65,7 +70,7 @@ public class DbInitializer(IServiceScopeFactory scopeFactory,
                     });
                 }
             }
-            
+
             await flightDbContext.SaveChangesAsync(cancellationToken);
         }
     }

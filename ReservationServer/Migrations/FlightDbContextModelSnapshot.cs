@@ -30,6 +30,10 @@ namespace ReservationServer.Migrations
                     b.Property<string>("SeatNumber")
                         .HasColumnType("text");
 
+                    b.Property<string>("BookingId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 

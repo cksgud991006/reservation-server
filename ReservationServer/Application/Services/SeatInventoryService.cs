@@ -29,17 +29,16 @@ public class SeatInventoryService : ISeatInventoryService
     {
         _logger.LogInformation("Received seat reservation request. FlightId: {FlightId}, SeatNumber: {SeatNumber}, UserId: {UserId}",
             flightId, seatNumber, id);
+        
+        // Check if the user is in the session
         var pos = await _redis.SortedSetRankAsync(RedisKeys.QueueActiveKey, id.ToString());
         if (pos == null) {
             return SeatInventoryResponse.CreateFailureResponse(flightId, seatNumber, id, "User is not in the active queue.");
         }
 
+        // Compute Redis keys
         var flightNumber = Computation.ComputeFlightNumberByFlightId(flightId);
         var departureTime = Computation.ComputeDepartureTimeByFlightId(flightId);
-
-        _logger.LogInformation("Computed flight number and departure time. FlightNumber: {FlightNumber}, DepartureTime: {DepartureTime}",
-            flightNumber, departureTime);
-
         var flightInstanceKey = RedisKeys.FlightInstance(flightNumber, Format.FormatDate(departureTime));
         var flightSeatCountKey = RedisKeys.FlightSeatCount(flightId);
         var seatLayoutKey = RedisKeys.SeatLayout(flightNumber, seatNumber);

@@ -22,8 +22,6 @@ public class BookSqlTaskProcessor : IDbTaskProcessor
             sqlTask.SeatNumber,
             sqlTask.UserId
         ));
-        
-        await flightDbContext.SaveChangesAsync();
 
         _logger.LogInformation("Processed SQL task. FlightId: {FlightId}, SeatNumber: {SeatNumber}, UserId: {UserId}",
             sqlTask.FlightId, sqlTask.SeatNumber, sqlTask.UserId);

@@ -9,11 +9,14 @@
 appsettings.json
 
 # db files
-#**/Migrations/*
+**/Migrations/*
 
 # log files
 note.txt
 *.log
+
+# frontend 
+**/.claude
 
 # test files
 **/results.jtl

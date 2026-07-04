@@ -11,7 +11,6 @@ using ReservationServer.Api.Dto;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// register DIs
 var redisSection = builder.Configuration.GetSection("Redis");
 var redisOptions = new ConfigurationOptions
 {
@@ -27,20 +26,23 @@ redisOptions.ConnectTimeout = 5000;      // Wait 5 seconds before timing out
 redisOptions.ConnectRetry = 5;           // Try 5 times to reconnect
 
 
-var scenario = builder.Configuration["TestScenario"] ?? "normal";
-builder.Configuration.AddJsonFile($"scenarios/{scenario}.json", optional: false, reloadOnChange: true);
+var scenario = builder.Configuration["Scenario"] ?? "normal";
+builder.Configuration.AddJsonFile($"Scenarios/{scenario}.json", optional: false, reloadOnChange: true);
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisOptions));
 builder.Services.AddSingleton<IDbTaskProcessor, BookSqlTaskProcessor>();
+
 builder.Services.AddScoped<IJobScheduler<Guid>, WaitQueueScheduler>();
 builder.Services.AddScoped<IJobScheduler<SqlTask>, SqlTaskScheduler>();
 builder.Services.AddScoped<IQueueService, QueueService>();
 builder.Services.AddScoped<IRedisSession, RedisSession>();
 builder.Services.AddScoped<ISeatInventoryService, SeatInventoryService>();
 builder.Services.AddScoped<ISeatInventoryRepository, SeatInventoryRepository>();
+
 builder.Services.AddHostedService<WaitQueueRunner>();
 builder.Services.AddHostedService<DbTaskRunner>();
 builder.Services.AddHostedService<DbInitializer>();
+builder.Services.AddHostedService<RedisInitializer>();
 
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()!;
 

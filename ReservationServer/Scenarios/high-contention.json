@@ -1,7 +1,7 @@
 {
     "SeedData": {
         "Flights": [
-            { "FlightNumber": "FL-100", "SeatCount": 1, "Prefix": "A" }
+            { "FlightNumber": "FL100", "SeatCount": 1, "Prefix": "A", "DepartureTime": "2023-10-01T10:00:00Z" }
         ]
   }
 }
