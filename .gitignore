@@ -14,6 +14,7 @@ appsettings.json
 # log files
 note.txt
 *.log
+todo.txt
 
 # frontend 
 **/.claude

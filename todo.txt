@@ -1,2 +1,0 @@
-1) redis size limit
-2) ci/cd run integration & unit test
