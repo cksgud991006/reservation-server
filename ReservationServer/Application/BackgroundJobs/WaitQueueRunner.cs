@@ -11,7 +11,8 @@ public class WaitQueueRunner : BackgroundService, IJobRunner<Guid>
 {
     private readonly IDatabase _redis;
     private readonly int _loadCount = 500;
-    private int _startCount = 0;
+    private readonly TimeSpan _minDelayMs = TimeSpan.FromMilliseconds(500);
+    private readonly TimeSpan _maxDelayS = TimeSpan.FromSeconds(10);
     private readonly ILogger<WaitQueueRunner> _logger;
     public WaitQueueRunner(IConnectionMultiplexer connectionMultiplexer,
                             ILogger<WaitQueueRunner> logger)
@@ -25,19 +26,23 @@ public class WaitQueueRunner : BackgroundService, IJobRunner<Guid>
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            await RunTask();
-            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+            int processed = await RunTask();
+            var delay = processed >= _loadCount ? _minDelayMs   // batch full -> set to drain fast
+                        : processed == 0 ?  _maxDelayS          // revert delay
+                        : TimeSpan.FromSeconds(2);              // default delay
+
+            await Task.Delay(delay, stoppingToken);
         }
     }
 
-    public async Task RunTask()
+    public async Task<int> RunTask()
     {
 
         // Implementation for running the job worker
         var jobs = await _redis.SortedSetRangeByRankAsync(
                 RedisKeys.QueueWaitKey,
-                _startCount,
-                _loadCount,
+                0,
+                -1,
                 Order.Ascending);
 
         // add to active users and redirect to issuing api
@@ -50,5 +55,7 @@ public class WaitQueueRunner : BackgroundService, IJobRunner<Guid>
             await _redis.SortedSetAddAsync(RedisKeys.QueueActiveKey, userId, timeExpiry);
             await _redis.SortedSetRemoveAsync(RedisKeys.QueueWaitKey, userId);
         }
+
+        return jobs.Length;
     }
 }
