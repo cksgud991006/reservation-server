@@ -1,4 +1,4 @@
-# [Reservation Booking Engine (Concurrency Mock)](https://cksgud991006.github.io/reservation-page/)
+# [Reservation Booking Engine (Concurrency Mock)](https://github.com/cksgud991006/reservation-server.git)
 A high-performance .NET backend designed to simulate and solve the challenges of high-concurrency seat reservation. This project focuses on maintaining strict data integrity when hundreds of users compete for limited inventory (e.g., a single seat).
 
 ## Technical Focus
