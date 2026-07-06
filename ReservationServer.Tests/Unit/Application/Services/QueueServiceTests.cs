@@ -3,16 +3,19 @@ using Moq;
 using ReservationServer.Application.Services;
 using ReservationServer.Application.Schedule;
 using ReservationServer.Domain.Response;
+using Microsoft.Extensions.Logging;
 
 public class QueueServiceTests
 {
+    private readonly Mock<ILogger<IQueueService>> _mockLogger;
     private readonly Mock<IJobScheduler<Guid>> _mockJobScheduler;
     private readonly QueueService _queueService;
 
     public QueueServiceTests()
     {
+        _mockLogger = new Mock<ILogger<IQueueService>>();
         _mockJobScheduler = new Mock<IJobScheduler<Guid>>();
-        _queueService = new QueueService(_mockJobScheduler.Object);
+        _queueService = new QueueService(_mockLogger.Object, _mockJobScheduler.Object);
     }
 
     [Fact]

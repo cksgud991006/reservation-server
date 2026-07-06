@@ -6,13 +6,16 @@ using ReservationServer.Application.Services;
 using ReservationServer.Application.Repositories;
 using ReservationServer.Application.Schedule;
 using ReservationServer.Api.Dto;
+using ReservationServer.Infrastructure.Redis;
+using ReservationServer.Domain.Response;
 
 public class SeatInventoryServiceTests
 {
     private readonly Mock<ILogger<SeatInventoryService>> _mockLogger;
     private readonly Mock<ISeatInventoryRepository> _mockSeatInventoryRepository;
-    private readonly Mock<IConnectionMultiplexer> _mockConnectionMultiplexer;
     private readonly Mock<IDatabase> _mockRedis;
+    private readonly Mock<IConnectionMultiplexer> _mockConnectionMultiplexer;
+    private readonly Mock<IRedisSession> _mockSession;
     private readonly Mock<IJobScheduler<SqlTask>> _mockJobScheduler;
     private readonly ISeatInventoryService _seatInventoryService;
 
@@ -23,8 +26,13 @@ public class SeatInventoryServiceTests
         _mockRedis = new Mock<IDatabase>();
         _mockConnectionMultiplexer = new Mock<IConnectionMultiplexer>();
         _mockConnectionMultiplexer.Setup(c => c.GetDatabase(It.IsAny<int>(), It.IsAny<object>())).Returns(_mockRedis.Object);
+        _mockSession = new Mock<IRedisSession>();
         _mockJobScheduler = new Mock<IJobScheduler<SqlTask>>();
-        _seatInventoryService = new SeatInventoryService(_mockLogger.Object, _mockSeatInventoryRepository.Object, _mockConnectionMultiplexer.Object, _mockJobScheduler.Object);
+        _seatInventoryService = new SeatInventoryService(_mockLogger.Object, 
+                                                        _mockSeatInventoryRepository.Object, 
+                                                        _mockConnectionMultiplexer.Object,
+                                                        _mockSession.Object,
+                                                        _mockJobScheduler.Object);
     }
 
     [Fact]
@@ -35,8 +43,7 @@ public class SeatInventoryServiceTests
         var seatNumber = "12A";
         var userId = Guid.NewGuid();
 
-        _mockRedis.Setup(r => r.SortedSetRankAsync(It.IsAny<RedisKey>(), It.IsAny<RedisValue>(), It.IsAny<Order>(), It.IsAny<CommandFlags>()))
-                  .ReturnsAsync(0); // Simulate user is in the active queue
+        _mockSession.Setup(r => r.GetSessionStatusAsync(It.IsAny<Guid>())).ReturnsAsync(SessionStatusResponse.Active(DateTimeOffset.Now.AddMinutes(10)));
 
         _mockRedis.Setup(r => r.ScriptEvaluateAsync(It.IsAny<string>(), It.IsAny<RedisKey[]>(), It.IsAny<RedisValue[]>(), It.IsAny<CommandFlags>()))
                   .ReturnsAsync(RedisResult.Create(new RedisValue[] { 1, "Seat booked successfully" })); // Simulate successful reservation
@@ -61,8 +68,7 @@ public class SeatInventoryServiceTests
         var seatNumber = "12A";
         var userId = Guid.NewGuid();
 
-        _mockRedis.Setup(r => r.SortedSetRankAsync(It.IsAny<RedisKey>(), It.IsAny<RedisValue>(), It.IsAny<Order>(), It.IsAny<CommandFlags>()))
-                  .ReturnsAsync((long?)null); // Simulate user is not in the active queue
+        _mockSession.Setup(r => r.GetSessionStatusAsync(It.IsAny<Guid>())).ReturnsAsync(SessionStatusResponse.NotActive());
 
         // Act
         var result = await _seatInventoryService.ReserveSeatAsync(flightId, seatNumber, userId);
@@ -83,8 +89,7 @@ public class SeatInventoryServiceTests
         var seatNumber = "12A";
         var userId = Guid.NewGuid();
 
-        _mockRedis.Setup(r => r.SortedSetRankAsync(It.IsAny<RedisKey>(), It.IsAny<RedisValue>(), It.IsAny<Order>(), It.IsAny<CommandFlags>()))
-                  .ReturnsAsync(0); // Simulate user is in the active queue
+        _mockSession.Setup(r => r.GetSessionStatusAsync(It.IsAny<Guid>())).ReturnsAsync(SessionStatusResponse.Active(DateTimeOffset.Now.AddMinutes(10)));
 
         _mockRedis.Setup(r => r.ScriptEvaluateAsync(It.IsAny<string>(), It.IsAny<RedisKey[]>(), It.IsAny<RedisValue[]>(), It.IsAny<CommandFlags>()))
                   .ReturnsAsync(RedisResult.Create(new RedisValue[] { 0, "Seat is already occupied" })); // Simulate duplicate reservation
@@ -108,8 +113,7 @@ public class SeatInventoryServiceTests
         var seatNumber = "12A";
         var userId = Guid.NewGuid();
 
-        _mockRedis.Setup(r => r.SortedSetRankAsync(It.IsAny<RedisKey>(), It.IsAny<RedisValue>(), It.IsAny<Order>(), It.IsAny<CommandFlags>()))
-                  .ReturnsAsync(0); // Simulate user is in the active queue
+        _mockSession.Setup(r => r.GetSessionStatusAsync(It.IsAny<Guid>())).ReturnsAsync(SessionStatusResponse.Active(DateTimeOffset.Now.AddMinutes(10)));
 
         _mockRedis.Setup(r => r.ScriptEvaluateAsync(It.IsAny<string>(), It.IsAny<RedisKey[]>(), It.IsAny<RedisValue[]>(), It.IsAny<CommandFlags>()))
                   .ReturnsAsync(RedisResult.Create(new RedisValue[] { -2, "No seats available" })); // Simulate no seats available
@@ -133,8 +137,7 @@ public class SeatInventoryServiceTests
         var seatNumber = "12A";
         var userId = Guid.NewGuid();
 
-        _mockRedis.Setup(r => r.SortedSetRankAsync(It.IsAny<RedisKey>(), It.IsAny<RedisValue>(), It.IsAny<Order>(), It.IsAny<CommandFlags>()))
-                  .ReturnsAsync(0); // Simulate user is in the active queue
+        _mockSession.Setup(r => r.GetSessionStatusAsync(It.IsAny<Guid>())).ReturnsAsync(SessionStatusResponse.Active(DateTimeOffset.Now.AddMinutes(10)));
 
         _mockRedis.Setup(r => r.ScriptEvaluateAsync(It.IsAny<string>(), It.IsAny<RedisKey[]>(), It.IsAny<RedisValue[]>(), It.IsAny<CommandFlags>()))
                   .ReturnsAsync(RedisResult.Create(new RedisValue[] { 100, "" })); // Simulate unexpected response code
