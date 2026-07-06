@@ -1,0 +1,36 @@
+name: CI-TESTS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }} - ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Copy source
+        uses: actions/checkout@v4
+
+      - name: Set up SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+          cache: true
+          cache-dependency-path: "**/packages.lock.json"
+      
+      - name: Install dependencies
+        run: dotnet restore ReservationServer.slnx
+      
+      - name: Build
+        run: dotnet build ReservationServer.slnx --no-restore -c Release
+
+      - name: Test
+        run: dotnet test ReservationServer.slnx --no-restore -c Release
+        
+        
