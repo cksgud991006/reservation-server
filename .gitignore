@@ -8,9 +8,6 @@
 # host development files
 appsettings.json
 
-# db files
-**/Migrations/*
-
 # log files
 note.txt
 *.log
