@@ -1,7 +1,0 @@
-{
-    "SeedData": {
-        "Flights": [
-            { "FlightNumber": "FL-100", "SeatCount": 1, "Prefix": "A" }
-        ]
-  }
-}

@@ -9,11 +9,18 @@
 appsettings.json
 
 # db files
-#**/Migrations/*
+**/Migrations/*
 
 # log files
 note.txt
 *.log
+todo.txt
+
+# frontend
+**/.claude
+
+# local-only overrides, not for git
+docker-compose.override.yml
 
 # test files
 **/results.jtl
