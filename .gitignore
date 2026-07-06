@@ -16,8 +16,11 @@ note.txt
 *.log
 todo.txt
 
-# frontend 
+# frontend
 **/.claude
+
+# local-only overrides, not for git
+docker-compose.override.yml
 
 # test files
 **/results.jtl

@@ -8,6 +8,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - Scenario=normal
+      - AllowedOrigins__0=https://cksgud991006.github.io
       - ConnectionStrings__DefaultConnection=Host=db;Database=ReservationDb;Username=postgres;Password=password
       - Redis__Host=redis
       - Redis__Port=6379

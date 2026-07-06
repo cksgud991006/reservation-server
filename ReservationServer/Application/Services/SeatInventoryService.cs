@@ -5,6 +5,7 @@ using ReservationServer.Domain.Response;
 using ReservationServer.Core;
 using ReservationServer.Api.Dto;
 using ReservationServer.Application.Schedule;
+using ReservationServer.Infrastructure.Redis;
 
 namespace ReservationServer.Application.Services;
 public class SeatInventoryService : ISeatInventoryService
@@ -12,16 +13,19 @@ public class SeatInventoryService : ISeatInventoryService
     private readonly ILogger<ISeatInventoryService> _logger;
     private readonly ISeatInventoryRepository _seatInventoryRepository;
     private readonly IDatabase _redis;
+    private readonly IRedisSession _session;
     private readonly IJobScheduler<SqlTask> _jobScheduler;
 
     public SeatInventoryService(ILogger<ISeatInventoryService> logger,
                               ISeatInventoryRepository seatInventoryRepository,
                               IConnectionMultiplexer connectionMultiplexer,
+                              IRedisSession session,
                               IJobScheduler<SqlTask> jobScheduler)
     {
         _logger = logger;           
         _seatInventoryRepository = seatInventoryRepository;
         _redis = connectionMultiplexer.GetDatabase();
+        _session = session;
         _jobScheduler = jobScheduler;
     }
 
@@ -31,8 +35,8 @@ public class SeatInventoryService : ISeatInventoryService
             flightId, seatNumber, id);
         
         // Check if the user is in the session
-        var pos = await _redis.SortedSetRankAsync(RedisKeys.QueueActiveKey, id.ToString());
-        if (pos == null) {
+        var response = await _session.GetSessionStatusAsync(id);
+        if (!response.IsActive) {
             return SeatInventoryResponse.CreateFailureResponse(flightId, seatNumber, id, "User is not in the active queue.");
         }
 

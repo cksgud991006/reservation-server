@@ -6,9 +6,12 @@ namespace ReservationServer.Application.Services;
 
 public class QueueService: IQueueService
 {
+    private readonly ILogger<IQueueService> _logger;
     private readonly IJobScheduler<Guid> _jobScheduler;
-    public QueueService(IJobScheduler<Guid> jobScheduler)
+    public QueueService(ILogger<IQueueService> logger,
+                        IJobScheduler<Guid> jobScheduler)
     {
+        _logger = logger;
         _jobScheduler = jobScheduler;   
     }
 
@@ -29,6 +32,8 @@ public class QueueService: IQueueService
         Guid id,
         DateTimeOffset RequestTime)
     {
+
+        _logger.LogInformation("Received queue request. UserId: {UserId}", id);
 
         await _jobScheduler.ScheduleAsync(id, RequestTime);
         
